@@ -1,0 +1,45 @@
+---
+export interface Props {
+    title: string;
+    description?: string;
+}
+
+const {
+    title,
+    description = "Learn new English words with spaced repetition",
+} = Astro.props;
+
+import "../styles/global.css";
+
+import Navbar from "../components/Navbar.astro";
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <title>{title}</title>
+
+        <script>
+            // Theme initialization - runs before page load to prevent flash
+            if (typeof localStorage !== "undefined") {
+                const theme = localStorage.getItem("theme");
+                if (
+                    theme === "dark" ||
+                    (!theme &&
+                        window.matchMedia("(prefers-color-scheme: dark)")
+                            .matches)
+                ) {
+                    document.documentElement.classList.add("dark");
+                }
+            }
+        </script>
+    </head>
+    <body class="bg-background text-foreground min-h-screen">
+        <Navbar />
+        <slot />
+    </body>
+</html>
