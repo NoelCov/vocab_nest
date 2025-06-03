@@ -1,0 +1,204 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Vocab Nest - Words">
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-4">Your Word Collection</h2>
+            <p class="text-foreground/75 mb-6">
+                Build your vocabulary by adding new words and creating example
+                sentences.
+            </p>
+
+            <!-- Add New Word Form -->
+            <div
+                class="bg-background rounded-xl shadow-sm border border-input p-6 mb-8"
+            >
+                <h3 class="text-xl font-semibold mb-4">Add New Word</h3>
+                <form id="add-word-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label
+                                for="word-input"
+                                class="block text-sm font-medium mb-2"
+                                >Word</label
+                            >
+                            <input
+                                type="text"
+                                id="word-input"
+                                required
+                                class="w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-primary/70 focus-ring"
+                                placeholder="Enter a new word"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                for="definition-input"
+                                class="block text-sm font-medium mb-2"
+                                >Definition</label
+                            >
+                            <input
+                                type="text"
+                                id="definition-input"
+                                required
+                                class="w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-primary/70 focus-ring"
+                                placeholder="Enter definition"
+                            />
+                        </div>
+                    </div>
+                    <button
+                        type="submit"
+                        class="bg-background border border-input hover:bg-accent hover:text-accent-foreground text-foreground shadow-sm px-8 py-2 rounded-sm font-medium text-sm transition-colors duration-200 cursor-pointer"
+                    >
+                        Add Word
+                    </button>
+                </form>
+            </div>
+
+            <!-- Words List -->
+            <div
+                id="words-list"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+                <!-- Words will be dynamically inserted here -->
+            </div>
+
+            <div id="no-words" class="text-center py-12">
+                <div class="text-primary text-6xl mb-4">📚</div>
+                <h3 class="text-xl font-semibold mb-2">No words yet</h3>
+                <p class="text-foreground">
+                    Add your first word to get started!
+                </p>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<!-- <script>
+  // Words page functionality
+  function initWordsPage() {
+    const addWordForm = document.getElementById('add-word-form');
+    const wordsList = document.getElementById('words-list');
+    const noWordsDiv = document.getElementById('no-words');
+    const exampleModal = document.getElementById('example-modal');
+    
+    // Add word form handler
+    addWordForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const wordInput = document.getElementById('word-input');
+      const definitionInput = document.getElementById('definition-input');
+      
+      const word = wordInput.value.trim();
+      const definition = definitionInput.value.trim();
+      
+      if (word && definition) {
+        const result = window.wordStore.addWord(word, definition);
+        alert(result.message);
+        
+        wordInput.value = '';
+        definitionInput.value = '';
+        renderWords();
+      }
+    });
+    
+    // Render words
+    function renderWords() {
+      const words = window.wordStore.getAllWords();
+      
+      if (words.length === 0) {
+        wordsList.innerHTML = '';
+        noWordsDiv?.classList.remove('hidden');
+        return;
+      }
+      
+      noWordsDiv?.classList.add('hidden');
+      
+      wordsList.innerHTML = words.map(word => `
+        <div class="word-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-fade-in">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-xl font-semibold text-blue-600 dark:text-blue-400">${word.word}</h3>
+            <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-sm font-medium">
+              ${word.counter}
+            </span>
+          </div>
+          <p class="text-gray-600 dark:text-gray-400 mb-4">${word.definition}</p>
+          
+          ${word.example ? `
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Example:</p>
+              <p class="text-gray-900 dark:text-gray-100 italic">${word.example}</p>
+            </div>
+          ` : `
+            <button class="add-example-btn bg-green-100 dark:bg-green-900 hover:bg-green-200 dark:hover:bg-green-800 text-green-700 dark:text-green-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus-ring" data-word-id="${word.id}">
+              Add Example
+            </button>
+          `}
+          
+          <button class="delete-word-btn mt-2 text-red-500 hover:text-red-700 text-sm font-medium transition-colors duration-200 focus-ring" data-word-id="${word.id}">
+            Delete
+          </button>
+        </div>
+      `).join('');
+      
+      // Add event listeners for dynamically created buttons
+      document.querySelectorAll('.add-example-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const wordId = parseInt(e.target.dataset.wordId);
+          openExampleModal(wordId);
+        });
+      });
+      
+      document.querySelectorAll('.delete-word-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const wordId = parseInt(e.target.dataset.wordId);
+          if (confirm('Are you sure you want to delete this word?')) {
+            window.wordStore.deleteWord(wordId);
+            renderWords();
+          }
+        });
+      });
+    }
+    
+    // Example modal functions
+    function openExampleModal(wordId) {
+      const word = window.wordStore.getWordById(wordId);
+      if (word) {
+        document.getElementById('example-word-id').value = wordId;
+        document.getElementById('example-input').value = '';
+        exampleModal?.classList.remove('hidden');
+        document.getElementById('example-input')?.focus();
+      }
+    }
+    
+    function closeExampleModal() {
+      exampleModal?.classList.add('hidden');
+    }
+    
+    // Example modal event listeners
+    document.getElementById('cancel-example')?.addEventListener('click', closeExampleModal);
+    exampleModal?.addEventListener('click', (e) => {
+      if (e.target === exampleModal) closeExampleModal();
+    });
+    
+    document.getElementById('example-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const wordId = parseInt(document.getElementById('example-word-id').value);
+      const example = document.getElementById('example-input').value.trim();
+      
+      if (window.wordStore.addExample(wordId, example)) {
+        renderWords();
+        closeExampleModal();
+      }
+    });
+    
+    // Initial render
+    renderWords();
+    
+    // Listen for changes
+    window.wordStore.addListener(renderWords);
+  }
+  
+  // Initialize when DOM is loaded
+  document.addEventListener('DOMContentLoaded', initWordsPage);
+</script> -->
