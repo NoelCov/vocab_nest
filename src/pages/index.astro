@@ -75,6 +75,44 @@ import Layout from "../layouts/Layout.astro";
     </main>
 </Layout>
 
+<script>
+    // localStorage.removeItem("words");
+    console.log(localStorage.getItem("words"));
+
+    const form = document.getElementById("add-word-form");
+    form?.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const word = document.getElementById("word-input")?.value;
+        const definition = document.getElementById("definition-input")?.value;
+        let wordObj = {
+            definition: [definition],
+            counter: 1,
+        };
+
+        const words = localStorage.getItem("words");
+        if (!words) {
+            const words = Object();
+            words[word] = wordObj;
+            localStorage.setItem("words", JSON.stringify(words));
+            console.log(
+                "No words found. Created new words object with new word and its definition."
+            );
+        } else {
+            // Check if we have the word, if so, increment the counter, otherwise, create a new one.
+            const wordsObj = JSON.parse(words);
+            if (!Object.hasOwn(wordsObj, word)) {
+                wordsObj[word] = [wordObj];
+            } else {
+                const counter = wordsObj[word]["counter"];
+                wordsObj[word]["counter"] = counter + 1;
+            }
+            localStorage.setItem("words", JSON.stringify(wordsObj));
+            console.log(wordsObj);
+        }
+    });
+</script>
+
 <!-- <script>
   // Words page functionality
   function initWordsPage() {
@@ -83,24 +121,7 @@ import Layout from "../layouts/Layout.astro";
     const noWordsDiv = document.getElementById('no-words');
     const exampleModal = document.getElementById('example-modal');
     
-    // Add word form handler
-    addWordForm?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const wordInput = document.getElementById('word-input');
-      const definitionInput = document.getElementById('definition-input');
-      
-      const word = wordInput.value.trim();
-      const definition = definitionInput.value.trim();
-      
-      if (word && definition) {
-        const result = window.wordStore.addWord(word, definition);
-        alert(result.message);
-        
-        wordInput.value = '';
-        definitionInput.value = '';
-        renderWords();
-      }
-    });
+  
     
     // Render words
     function renderWords() {
