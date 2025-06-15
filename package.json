@@ -9,8 +9,18 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/preact": "^4.1.0",
+    "@radix-ui/react-dialog": "^1.1.14",
     "@tailwindcss/vite": "^4.1.8",
     "astro": "^5.8.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.513.0",
+    "preact": "^10.26.8",
+    "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.8"
+  },
+  "devDependencies": {
+    "tw-animate-css": "^1.3.4"
   }
 }

@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import WordsList from "../components/WordsList";
 ---
 
 <Layout title="Vocab Nest - Words">
@@ -10,7 +11,6 @@ import Layout from "../layouts/Layout.astro";
                 Build your vocabulary by adding new words and creating example
                 sentences.
             </p>
-
             <!-- Add New Word Form -->
             <div
                 class="bg-background rounded-xl shadow-sm border border-input p-6 mb-8"
@@ -46,6 +46,19 @@ import Layout from "../layouts/Layout.astro";
                                 placeholder="Enter definition"
                             />
                         </div>
+                        <div>
+                            <label
+                                for="example-input"
+                                class="block text-sm font-medium mb-2"
+                                >Example</label
+                            >
+                            <input
+                                type="text"
+                                id="example-input"
+                                class="w-full px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-primary/70 focus-ring"
+                                placeholder="Enter example (optional)"
+                            />
+                        </div>
                     </div>
                     <button
                         type="submit"
@@ -56,14 +69,7 @@ import Layout from "../layouts/Layout.astro";
                 </form>
             </div>
 
-            <!-- Words List -->
-            <div
-                id="words-list"
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-                <!-- Words will be dynamically inserted here -->
-            </div>
-
+            <WordsList id="words-list" class:list="" client:load />
             <div id="no-words" class="text-center py-12">
                 <div class="text-primary text-6xl mb-4">📚</div>
                 <h3 class="text-xl font-semibold mb-2">No words yet</h3>
@@ -76,8 +82,8 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <script>
+    console.log("Current word list: " + localStorage.getItem("words"));
     // localStorage.removeItem("words");
-    console.log(localStorage.getItem("words"));
 
     const form = document.getElementById("add-word-form");
     form?.addEventListener("submit", (e) => {
@@ -85,9 +91,11 @@ import Layout from "../layouts/Layout.astro";
 
         const word = document.getElementById("word-input")?.value;
         const definition = document.getElementById("definition-input")?.value;
+        const example = document.getElementById("example-input")?.value;
         let wordObj = {
-            definition: [definition],
+            definition: definition,
             counter: 1,
+            example: example == "" ? "No example provided." : example,
         };
 
         const words = localStorage.getItem("words");
@@ -98,19 +106,39 @@ import Layout from "../layouts/Layout.astro";
             console.log(
                 "No words found. Created new words object with new word and its definition."
             );
+            displayWordsList();
         } else {
             // Check if we have the word, if so, increment the counter, otherwise, create a new one.
             const wordsObj = JSON.parse(words);
             if (!Object.hasOwn(wordsObj, word)) {
-                wordsObj[word] = [wordObj];
+                wordsObj[word] = wordObj;
             } else {
                 const counter = wordsObj[word]["counter"];
                 wordsObj[word]["counter"] = counter + 1;
+
+                if (
+                    wordsObj[word]["example"] === "No example provided." &&
+                    example !== ""
+                ) {
+                    wordsObj[word]["example"] = example;
+                }
             }
             localStorage.setItem("words", JSON.stringify(wordsObj));
             console.log(wordsObj);
         }
     });
+
+    const wordsList = document.getElementById("words-list");
+    // I want to not show anything, unless there are words, if so, then remove the hidden class and show them, otherwise add the hidden class. Since this will run at the beginning, initialize it, and then call function to show words when the form gets called.
+    const displayWordsList = () => {
+        console.log("Displaying words list.");
+
+        if (wordsList?.classList.contains("hidden")) {
+            wordsList.classList.remove("hidden");
+        }
+    };
+
+    const words = localStorage.getItem("words");
 </script>
 
 <!-- <script>
